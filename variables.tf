@@ -29,8 +29,3 @@ variable "private_subnet_cidrs" {
   type        = list(string)
   description = "List of private subnet CIDR blocks"
 }
-
-variable "availability_zones" {
-  type        = list(string)
-  description = "List of availability zones"
-}
