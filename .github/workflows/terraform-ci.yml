@@ -19,10 +19,12 @@ jobs:
           terraform_version: latest
 
       - name: Initialize Terraform
+        working-directory: environments/dev
         run: terraform init
 
       - name: Check Terraform formatting
         run: terraform fmt -check -recursive
 
       - name: Validate Terraform configuration
+        working-directory: environments/dev
         run: terraform validate
