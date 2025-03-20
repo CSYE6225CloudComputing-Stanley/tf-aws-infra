@@ -45,12 +45,6 @@ variable "ami_id" {
   description = "ami id"
 }
 
-
-variable "webapp_instance_public_subnet" {
-  type        = string
-  description = "Specify which public subnet to use"
-}
-
 variable "key_name" {
   type        = string
   description = "ssh key name"
@@ -81,4 +75,28 @@ variable "iam_group_name" {
   description = "iam group name"
 }
 
+variable "DB_NAME" {
+  description = "Database name"
+  type        = string
+}
+
+variable "DB_USERNAME" {
+  description = "Database username"
+  type        = string
+}
+
+variable "DB_PASSWORD" {
+  description = "Database password"
+  type        = string
+}
+
+variable "DB_HOST" {
+  description = "Database host"
+  type        = string
+}
+
+variable "BUCKET_NAME" {
+  description = "Database host"
+  type        = string
+}
 
