@@ -2,8 +2,7 @@
 resource "aws_security_group" "application_security_group" {
   name        = "application-security-group"
   description = "Security group for web application EC2 instances"
-  #   vpc_id      = aws_vpc.my_vpc.id
-  vpc_id = var.vpc_id
+  vpc_id      = var.vpc_id
 
   ingress {
     from_port   = 22
@@ -31,6 +30,14 @@ resource "aws_security_group" "application_security_group" {
     to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow all outbound traffic"
   }
 
   tags = { Name = "application security group" }

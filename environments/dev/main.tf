@@ -1,10 +1,15 @@
 module "ec2" {
-  source                        = "../../modules/ec2"
-  key_name                      = var.key_name
-  ami_id                        = var.ami_id
-  instance_type                 = var.instance_type
-  webapp_instance_public_subnet = var.webapp_instance_public_subnet
-  security_group_id             = module.security.security_group_id
+  source                           = "../../modules/ec2"
+  key_name                         = var.key_name
+  ami_id                           = var.ami_id
+  instance_type                    = var.instance_type
+  webapp_instance_public_subnet_id = module.network.public_subnets_id[0]
+  security_group_id                = module.security.security_group_id
+  DB_HOST                          = var.DB_HOST
+  DB_NAME                          = var.DB_NAME
+  DB_USERNAME                      = var.DB_USERNAME
+  DB_PASSWORD                      = var.DB_PASSWORD
+  BUCKET_NAME                      = var.BUCKET_NAME
 }
 
 module "iam" {
