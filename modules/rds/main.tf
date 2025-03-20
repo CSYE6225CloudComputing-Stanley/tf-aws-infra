@@ -20,7 +20,7 @@ resource "aws_db_parameter_group" "rds_pg" {
 
   parameter {
     name  = "max_connections"
-    value = "5"
+    value = "200"
   }
 
   tags = {
@@ -29,9 +29,8 @@ resource "aws_db_parameter_group" "rds_pg" {
 }
 
 resource "aws_db_instance" "rds_instance" {
-  identifier        = "csye6225"
-  allocated_storage = 20
-  #   storage_type           = "gp2"
+  identifier           = "csye6225"
+  allocated_storage    = 20
   engine               = "mysql"
   engine_version       = "8.0"
   instance_class       = "db.t3.micro"
