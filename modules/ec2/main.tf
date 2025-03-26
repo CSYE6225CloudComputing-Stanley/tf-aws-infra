@@ -6,6 +6,11 @@ resource "aws_instance" "ec2_instance" {
   key_name                    = var.key_name
   associate_public_ip_address = true
   iam_instance_profile        = aws_iam_instance_profile.ec2_profile.name
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "optional"
+    http_put_response_hop_limit = 1
+  }
 
   root_block_device {
     volume_size           = 25
@@ -14,42 +19,34 @@ resource "aws_instance" "ec2_instance" {
   }
 
   disable_api_termination = false
+  user_data = templatefile("${path.module}/../../scripts/user_data.sh", {
+    DB_NAME     = var.DB_NAME,
+    DB_USERNAME = var.DB_USERNAME,
+    DB_PASSWORD = var.DB_PASSWORD,
+    DB_HOST     = var.DB_HOST,
+    BUCKET_NAME = var.BUCKET_NAME
+  })
 
-  user_data = <<-EOF
-    #!/bin/bash
-
-    echo "Setting up environment variables..."
-    echo "DB_NAME=${var.DB_NAME}" | sudo tee -a /etc/environment
-    echo "DB_USERNAME=${var.DB_USERNAME}" | sudo tee -a /etc/environment
-    echo "DB_PASSWORD=${var.DB_PASSWORD}" | sudo tee -a /etc/environment
-    echo "DB_HOST=${var.DB_HOST}" | sudo tee -a /etc/environment
-    echo "BUCKET_NAME=${var.BUCKET_NAME}" | sudo tee -a /etc/environment
-
-    echo "Reloading environment variables..."
-    source /etc/environment
-
-    echo "Restarting Spring Boot service..."
-    sudo systemctl restart springboot.service
-
-  EOF
-  tags      = { Name = "web application server" }
+  tags = { Name = "web application server" }
 }
 
 
-# attach s3 rule to ec2
-resource "aws_iam_role" "ec2_s3_role" {
-  name = "EC2S3AccessRole"
+resource "aws_iam_role" "ec2_role" {
+  name = "ec2-combined-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version = "2012-10-17",
     Statement = [{
-      Effect    = "Allow"
-      Principal = { Service = "ec2.amazonaws.com" }
-      Action    = "sts:AssumeRole"
+      Effect = "Allow",
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      },
+      Action = "sts:AssumeRole"
     }]
   })
 }
 
+# S3 Policy
 resource "aws_iam_policy" "s3_access_policy" {
   name        = "EC2S3AccessPolicy"
   description = "Allow EC2 to access S3"
@@ -72,12 +69,38 @@ resource "aws_iam_policy" "s3_access_policy" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "attach_s3_policy" {
-  role       = aws_iam_role.ec2_s3_role.name
+# CloudWatch Agent Policy
+resource "aws_iam_policy" "cw_agent_policy" {
+  name = "cw-agent-policy"
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Action = [
+        "logs:PutLogEvents",
+        "logs:DescribeLogStreams",
+        "logs:DescribeLogGroups",
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "cloudwatch:PutMetricData"
+      ],
+      Resource = "*"
+    }]
+  })
+}
+
+# Attach both policies to the same role
+resource "aws_iam_role_policy_attachment" "attach_s3" {
+  role       = aws_iam_role.ec2_role.name
   policy_arn = aws_iam_policy.s3_access_policy.arn
 }
 
+resource "aws_iam_role_policy_attachment" "attach_cw" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = aws_iam_policy.cw_agent_policy.arn
+}
+
 resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2-s3-profile"
-  role = aws_iam_role.ec2_s3_role.name
+  name = "ec2-profile"
+  role = aws_iam_role.ec2_role.name
 }
