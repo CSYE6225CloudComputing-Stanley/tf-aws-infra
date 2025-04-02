@@ -48,3 +48,8 @@ variable "BUCKET_NAME" {
   description = "s3 bucket name"
   type        = string
 }
+
+variable "aws_lb_target_group_arn" {
+  description = "load balancer target group arn"
+  type        = string
+}
