@@ -1,3 +1,8 @@
+module "iam" {
+  source         = "../../modules/iam"
+  iam_group_name = var.iam_group_name
+}
+
 module "ec2" {
   source                           = "../../modules/ec2"
   key_name                         = var.key_name
@@ -10,11 +15,14 @@ module "ec2" {
   DB_USERNAME                      = var.DB_USERNAME
   DB_PASSWORD                      = var.DB_PASSWORD
   BUCKET_NAME                      = var.BUCKET_NAME
+  aws_lb_target_group_arn          = module.loadbalancer.aws_lb_target_group_arn
 }
 
-module "iam" {
-  source         = "../../modules/iam"
-  iam_group_name = var.iam_group_name
+module "loadbalancer" {
+  source               = "../../modules/loadbalancer"
+  vpc_id               = module.network.vpc_id
+  public_subnets_id    = module.network.public_subnets_id
+  lb_security_group_id = module.security.lb_security_group_id
 }
 
 module "network" {
@@ -39,8 +47,8 @@ module "routing" {
 module "security" {
   source = "../../modules/security"
   vpc_id = module.network.vpc_id
+  my_ip  = var.my_ip
 }
-
 module "storage" {
   source     = "../../modules/storage"
   depends_on = [module.iam]
