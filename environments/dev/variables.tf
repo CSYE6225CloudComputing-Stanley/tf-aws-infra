@@ -100,3 +100,7 @@ variable "BUCKET_NAME" {
   type        = string
 }
 
+variable "my_ip" {
+  description = "my ip"
+  type        = string
+}
