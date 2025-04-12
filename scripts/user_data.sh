@@ -1,9 +1,21 @@
 #!/bin/bash
 
+REGION="${REGION}"
+SECRET_NAME="${SECRET_NAME}"
+
+echo "Getting DB password from Secrets Manager..."
+SECRET_JSON=$(aws secretsmanager get-secret-value \
+  --region $REGION \
+  --secret-id $SECRET_NAME \
+  --query SecretString \
+  --output text)
+
+DB_PASSWORD=$(echo $SECRET_JSON | jq -r .password)
+
 echo "Setting up environment variables..."
 echo "DB_NAME=${DB_NAME}" | sudo tee -a /etc/environment
 echo "DB_USERNAME=${DB_USERNAME}" | sudo tee -a /etc/environment
-echo "DB_PASSWORD=${DB_PASSWORD}" | sudo tee -a /etc/environment
+echo "DB_PASSWORD=$${DB_PASSWORD}" | sudo tee -a /etc/environment
 echo "DB_HOST=${DB_HOST}" | sudo tee -a /etc/environment
 echo "BUCKET_NAME=${BUCKET_NAME}" | sudo tee -a /etc/environment
 

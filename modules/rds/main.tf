@@ -35,8 +35,10 @@ resource "aws_db_instance" "rds_instance" {
   engine_version       = "8.0"
   instance_class       = "db.t3.micro"
   username             = var.mysql_username
-  password             = var.mysql_password
+  password             = random_password.db_password.result
   parameter_group_name = aws_db_parameter_group.rds_pg.name
+  storage_encrypted    = true
+  kms_key_id           = var.kms_rds_key_id
 
   publicly_accessible    = false
   db_subnet_group_name   = aws_db_subnet_group.rds_subnet_group.name
@@ -52,4 +54,26 @@ resource "aws_db_instance" "rds_instance" {
   tags = {
     Name = "csye6225-rds"
   }
+}
+
+// rds password
+resource "random_password" "db_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
+resource "aws_secretsmanager_secret" "secret_manager" {
+  name       = "rds-db-password-${formatdate("YYYYMMDDhhmmss", timestamp())}"
+  kms_key_id = var.kms_secret_manager_key_id
+  lifecycle {
+    ignore_changes = [name]
+  }
+}
+
+resource "aws_secretsmanager_secret_version" "db_password_value" {
+  secret_id = aws_secretsmanager_secret.secret_manager.id
+  secret_string = jsonencode({
+    password = random_password.db_password.result
+  })
 }

@@ -1,0 +1,55 @@
+{
+    "Version": "2012-10-17",
+    "Id": "key-policy",
+    "Statement": [
+      {
+        "Sid": "Enable IAM User Permissions",
+        "Effect": "Allow",
+        "Principal": {
+          "AWS": "arn:aws:iam::${account_id}:root"
+        },
+        "Action": "kms:*",
+        "Resource": "*"
+      },
+      {
+        "Sid": "Allow use of the key (EC2 role + AutoScaling role)",
+        "Effect": "Allow",
+        "Principal": {
+          "AWS": [
+            "arn:aws:iam::${account_id}:role/${ec2_role_name}",
+            "arn:aws:iam::${account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
+          ]
+        },
+        "Action": [
+          "kms:DescribeKey",
+          "kms:Encrypt",
+          "kms:Decrypt",
+          "kms:ReEncrypt*",
+          "kms:GenerateDataKey",
+          "kms:GenerateDataKeyWithoutPlaintext"
+        ],
+        "Resource": "*"
+      },
+      {
+        "Sid": "Allow grant attach (EC2 role + AutoScaling role)",
+        "Effect": "Allow",
+        "Principal": {
+          "AWS": [
+            "arn:aws:iam::${account_id}:role/${ec2_role_name}",
+            "arn:aws:iam::${account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
+          ]
+        },
+        "Action": [
+          "kms:CreateGrant",
+          "kms:ListGrants",
+          "kms:RevokeGrant"
+        ],
+        "Resource": "*",
+        "Condition": {
+          "Bool": {
+            "kms:GrantIsForAWSResource": "true"
+          }
+        }
+      }
+    ]
+}

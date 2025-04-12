@@ -13,3 +13,8 @@ variable "public_subnets_id" {
   type        = list(string)
   description = "public subnets id"
 }
+
+variable "ssl_cert_arn" {
+  type        = string
+  description = "ssl arn"
+}

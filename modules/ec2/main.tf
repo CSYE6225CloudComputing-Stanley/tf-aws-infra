@@ -5,13 +5,14 @@ resource "aws_launch_template" "csye6225_asg" {
   key_name      = var.key_name
 
   iam_instance_profile {
-    name = aws_iam_instance_profile.ec2_profile.name
+    name = var.ec2_profile_name
   }
 
   user_data = base64encode(templatefile("${path.module}/../../scripts/user_data.sh", {
     DB_NAME     = var.DB_NAME,
     DB_USERNAME = var.DB_USERNAME,
-    DB_PASSWORD = var.DB_PASSWORD,
+    REGION      = var.region,
+    SECRET_NAME = var.secret_manager_name,
     DB_HOST     = var.DB_HOST,
     BUCKET_NAME = var.BUCKET_NAME
   }))
@@ -23,11 +24,13 @@ resource "aws_launch_template" "csye6225_asg" {
   }
 
   block_device_mappings {
-    device_name = "/dev/xvda"
+    device_name = "/dev/sda1"
     ebs {
       volume_size           = 25
       volume_type           = "gp2"
       delete_on_termination = true
+      encrypted             = true
+      kms_key_id            = var.kms_ec2_id
     }
   }
 
@@ -81,7 +84,6 @@ resource "aws_autoscaling_policy" "scale_up_policy" {
     metric_interval_lower_bound = "0"
   }
 
-  # cooldown                  = 60
   estimated_instance_warmup = 60
 }
 
@@ -130,79 +132,4 @@ resource "aws_cloudwatch_metric_alarm" "scale_down_alarm" {
     AutoScalingGroupName = aws_autoscaling_group.webapp_asg.name
   }
   alarm_actions = [aws_autoscaling_policy.scale_down_policy.arn]
-}
-
-
-resource "aws_iam_role" "ec2_role" {
-  name = "ec2-combined-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Principal = {
-        Service = "ec2.amazonaws.com"
-      },
-      Action = "sts:AssumeRole"
-    }]
-  })
-}
-
-# S3 Policy
-resource "aws_iam_policy" "s3_access_policy" {
-  name        = "EC2S3AccessPolicy"
-  description = "Allow EC2 to access S3"
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Action = [
-        "s3:ListBucket",
-        "s3:GetObject",
-        "s3:PutObject",
-        "s3:DeleteObject"
-      ],
-      Resource = [
-        "arn:aws:s3:::${var.BUCKET_NAME}",
-        "arn:aws:s3:::${var.BUCKET_NAME}/*"
-      ]
-    }]
-  })
-}
-
-# CloudWatch Agent Policy
-resource "aws_iam_policy" "cw_agent_policy" {
-  name = "cw-agent-policy"
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Action = [
-        "logs:PutLogEvents",
-        "logs:DescribeLogStreams",
-        "logs:DescribeLogGroups",
-        "logs:CreateLogGroup",
-        "logs:CreateLogStream",
-        "cloudwatch:PutMetricData"
-      ],
-      Resource = "*"
-    }]
-  })
-}
-
-# Attach both policies to the same role
-resource "aws_iam_role_policy_attachment" "attach_s3" {
-  role       = aws_iam_role.ec2_role.name
-  policy_arn = aws_iam_policy.s3_access_policy.arn
-}
-
-resource "aws_iam_role_policy_attachment" "attach_cw" {
-  role       = aws_iam_role.ec2_role.name
-  policy_arn = aws_iam_policy.cw_agent_policy.arn
-}
-
-resource "aws_iam_instance_profile" "ec2_profile" {
-  name = "ec2-profile"
-  role = aws_iam_role.ec2_role.name
 }
