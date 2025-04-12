@@ -13,11 +13,6 @@ variable "mysql_username" {
   description = "mysql username"
 }
 
-variable "mysql_password" {
-  type        = string
-  description = "mysql password"
-}
-
 variable "db_security_group_id" {
   type        = string
   description = "database security groupd id"
@@ -28,3 +23,12 @@ variable "db_availability_zone" {
   description = "database availability zone"
 }
 
+variable "kms_rds_key_id" {
+  description = "rds kms"
+  type        = string
+}
+
+variable "kms_secret_manager_key_id" {
+  description = "secret manager kms"
+  type        = string
+}

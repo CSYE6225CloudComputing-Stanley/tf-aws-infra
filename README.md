@@ -41,6 +41,16 @@ webapp_instance_public_subnet = "10.0.1.0/24"
 key_name               = "key file_name"
 ```
 
+## 📌 Import certificate into aws Certificate Manager
+
+```bash
+aws acm import-certificate \
+  --certificate fileb://demo_hahahaha_it_com.crt \
+  --private-key fileb://private.key \
+  --certificate-chain fileb://demo_hahahaha_it_com.ca-bundle \
+  --region us-east-1
+```
+
 ## 🚀 Usage
 
 ```bash
