@@ -104,3 +104,8 @@ variable "my_ip" {
   description = "my ip"
   type        = string
 }
+
+variable "ssl_cert_arn" {
+  type        = string
+  description = "ssl arn"
+}
