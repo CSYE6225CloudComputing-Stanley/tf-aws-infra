@@ -50,20 +50,6 @@ variable "key_name" {
   description = "ssh key name"
 }
 
-variable "mysql_username" {
-  type        = string
-  description = "mysql username"
-}
-
-variable "mysql_password" {
-  type        = string
-  description = "mysql password"
-}
-
-variable "mysql_db_name" {
-  type        = string
-  description = "mysql database name"
-}
 
 variable "db_availability_zone" {
   type        = string

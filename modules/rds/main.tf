@@ -34,7 +34,7 @@ resource "aws_db_instance" "rds_instance" {
   engine               = "mysql"
   engine_version       = "8.0"
   instance_class       = "db.t3.micro"
-  username             = var.mysql_username
+  username             = var.db_username
   password             = random_password.db_password.result
   parameter_group_name = aws_db_parameter_group.rds_pg.name
   storage_encrypted    = true
@@ -47,7 +47,7 @@ resource "aws_db_instance" "rds_instance" {
   availability_zone = var.db_availability_zone
 
   multi_az = false
-  db_name  = var.mysql_db_name
+  db_name  = var.db_name
 
   skip_final_snapshot = true
 
