@@ -49,8 +49,8 @@ module "storage" {
 
 module "rds" {
   source                    = "../../modules/rds"
-  mysql_db_name             = var.mysql_db_name
-  mysql_username            = var.mysql_username
+  db_name                   = var.DB_NAME
+  db_username               = var.DB_USERNAME
   private_subnet_ids        = module.network.private_subnets_ids
   db_security_group_id      = module.security.db_security_group_id
   db_availability_zone      = var.db_availability_zone

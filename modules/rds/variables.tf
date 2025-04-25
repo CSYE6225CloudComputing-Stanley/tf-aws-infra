@@ -3,12 +3,12 @@ variable "private_subnet_ids" {
   description = "private subnet ids"
 }
 
-variable "mysql_db_name" {
+variable "db_name" {
   type        = string
   description = "mysql database name"
 }
 
-variable "mysql_username" {
+variable "db_username" {
   type        = string
   description = "mysql username"
 }
