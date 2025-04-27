@@ -71,11 +71,6 @@ variable "DB_USERNAME" {
   type        = string
 }
 
-variable "DB_PASSWORD" {
-  description = "Database password"
-  type        = string
-}
-
 variable "DB_HOST" {
   description = "Database host"
   type        = string
