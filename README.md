@@ -6,6 +6,24 @@ This project uses [Terraform](https://www.terraform.io/) to provision a scalable
 
 ---
 
+## Terraform Continuous Integration
+
+Use **GitHub Actions** to check Terraform formatting and validate configurations when pull requests target the `main` branch.
+
+The CI workflow includes the following steps:
+
+- **Checkout** the repository
+- **Setup Terraform**
+- **Initialize Terraform** in the `environments/dev` directory
+- **Check Terraform formatting**
+- **Validate Terraform configuration**
+
+If any step fails, the pull request will be blocked from merging.
+
+---
+
+## AWS Infrastructure
+
 ### ☁️ Networking
 
 - **VPC** spanning multiple Availability Zones, with both **Public** and **Private** subnets
@@ -50,7 +68,7 @@ This project uses [Terraform](https://www.terraform.io/) to provision a scalable
   - **Application logs** from the application
   - **Custom Metrics** via **StatsD** for real-time performance monitoring
 
-
+---
 
 ## 🛠 Install Dependencies
 - **Terraform** ([Download](https://www.terraform.io/downloads.html))
@@ -61,6 +79,8 @@ This project uses [Terraform](https://www.terraform.io/) to provision a scalable
 Ensure you have AWS credentials configured:
 
 - Use `aws configure` to set up your credentials 
+
+---
 
 ## 📂 Project Structure
 ```bash
